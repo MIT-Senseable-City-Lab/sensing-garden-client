@@ -2,6 +2,27 @@
 
 All notable changes to the Sensing Garden Client will be documented in this file.
 
+## [0.0.13] - 2025-08-03
+
+### Added
+- Environment endpoint support via new `EnvironmentClient` class accessible via `client.environment`
+- Support for submitting environmental sensor readings including:
+  - Particulate matter measurements (PM1.0, PM2.5, PM4.0, PM10.0)
+  - Environmental conditions (humidity, temperature)
+  - Air quality indices (VOC, NOx)
+- Optional location data support for environmental readings (latitude, longitude, altitude)
+- `classification_data` field support for classifications to handle hierarchical taxonomy data with multiple candidates and confidence scores
+- Comprehensive tests for environment endpoint functionality
+- Usage examples for environment endpoints in README
+
+### Changed
+- Made `timestamp` a required parameter for environment submissions
+- Location parameter is now optional for environment readings
+- Updated README with environment endpoint usage examples
+
+### Removed
+- Removed invalid `test_sorting_with_invalid_sort_desc` test that was checking for TypeError
+
 ## [0.0.12] - 2025-05-12
 
 ### Added
