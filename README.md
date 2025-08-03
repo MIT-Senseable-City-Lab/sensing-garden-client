@@ -100,22 +100,26 @@ classification = sgc.classifications.add(
     timestamp="2023-06-01T12:34:56Z",
     bounding_box=[0.1, 0.2, 0.3, 0.4],  # Optional bounding box
     track_id="track-abc123",            # Optional tracking ID
-    metadata={"source": "drone", "weather": "sunny"}  # Optional metadata dict
+    metadata={"source": "drone", "weather": "sunny"},  # Optional metadata dict
+    classification_data={                # Optional hierarchical classification data
+        "family": [
+            {"name": "Rosaceae", "confidence": 0.95},
+            {"name": "Asteraceae", "confidence": 0.78}
+        ],
+        "genus": [
+            {"name": "Rosa", "confidence": 0.92},
+            {"name": "Rubus", "confidence": 0.65}
+        ],
+        "species": [
+            {"name": "Rosa gallica", "confidence": 0.89},
+            {"name": "Rosa canina", "confidence": 0.76}
+        ]
+    }
 )
 
-# bounding_box, track_id, and metadata are now supported for both detections and classifications.
-# The backend stores bounding_box values as Decimal for DynamoDB compatibility.
-# All tests have been updated and pass for these features (see CHANGELOG).
+# The classification_data field allows you to submit multiple candidates for each taxonomic level
+# with their respective confidence scores, enabling more detailed classification results.
 
-
-    family="Rosaceae",
-    genus="Rosa",
-    species="Rosa gallica",
-    family_confidence=0.95,
-    genus_confidence=0.92,
-    species_confidence=0.89,
-    timestamp="2023-06-01T12:34:56Z"
-)
 classifications = sgc.classifications.fetch(model_id="model-456")
 
 # Working with videos
