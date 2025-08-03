@@ -165,6 +165,10 @@ def get_random_test_name(name_list: List[str]) -> str:
     """
     return random.choice(name_list)
 
+# Default test constants
+DEFAULT_TEST_DEVICE_ID = "test-device-2025"
+DEFAULT_TEST_MODEL_ID = "test-model-2025"
+
 def print_response(response_data: Dict[str, Any]) -> None:
     """
     Print API response data in a formatted way.

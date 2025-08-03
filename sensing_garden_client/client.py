@@ -3,6 +3,8 @@ Core client for Sensing Garden API interactions.
 Provides base functionality used by all endpoint modules and the main client class.
 """
 from typing import Dict, Any, Mapping, Optional
+import base64
+import json
 import requests
 
 # Import sub-clients - these imports will be resolved when the package is fully loaded
@@ -13,6 +15,7 @@ if TYPE_CHECKING:
     from .detections import DetectionsClient
     from .classifications import ClassificationsClient
     from .videos import VideosClient
+    from .environment import EnvironmentClient
 
 
 class BaseClient:
@@ -201,10 +204,12 @@ class SensingGardenClient:
         from .detections import DetectionsClient
         from .classifications import ClassificationsClient
         from .videos import VideosClient
+        from .environment import EnvironmentClient
 
         self.models = ModelsClient(self._base_client)
         self.detections = DetectionsClient(self._base_client)
         self.classifications = ClassificationsClient(self._base_client)
+        self.environment = EnvironmentClient(self._base_client)
         if aws_access_key_id and aws_secret_access_key:
             self.videos = VideosClient(
                 self._base_client,

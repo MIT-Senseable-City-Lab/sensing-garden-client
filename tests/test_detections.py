@@ -17,7 +17,9 @@ from .test_utils import (
     create_test_image,
     generate_random_confidence,
     generate_random_bounding_box,
-    print_response
+    print_response,
+    DEFAULT_TEST_DEVICE_ID,
+    DEFAULT_TEST_MODEL_ID
 )
 
 def test_add_detection(device_id, model_id, timestamp=None, num_detections=3):

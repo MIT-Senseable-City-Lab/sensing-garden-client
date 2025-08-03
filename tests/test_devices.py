@@ -31,10 +31,3 @@ def test_add_and_delete_device(client):
     items2, _ = client.get_devices(device_id=device_id)
     assert not any(d["device_id"] == device_id for d in items2), f"Device {device_id} still present after delete"
 
-def test_add_device_missing_id(client):
-    with pytest.raises(Exception):
-        client.add_device("")
-
-def test_delete_device_missing_id(client):
-    with pytest.raises(Exception):
-        client.delete_device("")

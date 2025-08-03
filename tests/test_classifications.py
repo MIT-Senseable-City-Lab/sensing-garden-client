@@ -21,7 +21,9 @@ from .test_utils import (
     TEST_GENERA,
     TEST_SPECIES,
     print_response,
-    generate_random_bounding_box
+    generate_random_bounding_box,
+    DEFAULT_TEST_DEVICE_ID,
+    DEFAULT_TEST_MODEL_ID
 )
 
 def test_add_classification(device_id, model_id, timestamp=None):
@@ -45,7 +47,35 @@ def test_add_classification_with_track_id_and_metadata(device_id, model_id, time
     assert (response_data.get("track_id") == track_id or ("data" in response_data and response_data["data"].get("track_id") == track_id)), "track_id not returned in response"
     assert (response_data.get("metadata") == metadata or ("data" in response_data and response_data["data"].get("metadata") == metadata)), f"metadata not returned or mismatched: {response_data.get('metadata')} != {metadata}"
 
-def _add_classification(device_id, model_id, timestamp=None, bounding_box=None, track_id=None, metadata=None, return_response=False, return_sent_kwargs=False):
+def test_add_classification_with_classification_data(device_id, model_id, timestamp=None):
+    classification_data = {
+        "family": [
+            {"name": "Rosaceae", "confidence": 0.95},
+            {"name": "Asteraceae", "confidence": 0.78}
+        ],
+        "genus": [
+            {"name": "Rosa", "confidence": 0.92},
+            {"name": "Rubus", "confidence": 0.65}
+        ],
+        "species": [
+            {"name": "Rosa canina", "confidence": 0.88},
+            {"name": "Rosa rugosa", "confidence": 0.76}
+        ]
+    }
+    print(f"\n[TEST] Sending classification with classification_data: {classification_data}")
+    success, request_timestamp, response_data, sent_kwargs = _add_classification(
+        device_id, model_id, timestamp, 
+        classification_data=classification_data, 
+        return_response=True, 
+        return_sent_kwargs=True
+    )
+    print(f"[TEST] Full response received from server:\n{response_data}")
+    assert success, f"Classification with classification_data test failed at {request_timestamp}"
+    # Verify classification_data is returned in response
+    returned_data = response_data.get("classification_data") or response_data.get("data", {}).get("classification_data")
+    assert returned_data is not None, "classification_data not returned in response"
+
+def _add_classification(device_id, model_id, timestamp=None, bounding_box=None, track_id=None, metadata=None, classification_data=None, return_response=False, return_sent_kwargs=False):
     """
     Helper function to upload a classification to the Sensing Garden API.
     
@@ -97,6 +127,8 @@ def _add_classification(device_id, model_id, timestamp=None, bounding_box=None, 
             kwargs["track_id"] = track_id
         if metadata is not None:
             kwargs["metadata"] = metadata
+        if classification_data is not None:
+            kwargs["classification_data"] = classification_data
         
         # Send the request
         try:

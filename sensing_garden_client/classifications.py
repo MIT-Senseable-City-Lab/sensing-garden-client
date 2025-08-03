@@ -35,7 +35,8 @@ class ClassificationsClient:
         timestamp: str,
         bounding_box: Optional[Any] = None,
         track_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        classification_data: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Submit a classification to the Sensing Garden API.
@@ -54,6 +55,13 @@ class ClassificationsClient:
             bounding_box: Optional bounding box coordinates [x1, y1, x2, y2] or similar structure
             track_id: Optional string for tracking related classifications or external references
             metadata: Optional dict for arbitrary metadata to future-proof client extensions
+            classification_data: Optional dict containing detailed classification data 
+                               with multiple candidates. Format: 
+                               {
+                                 "family": [{"name": "family_name", "confidence": 0.9}, ...],
+                                 "genus": [{"name": "genus_name", "confidence": 0.8}, ...], 
+                                 "species": [{"name": "species_name", "confidence": 0.7}, ...]
+                               }
         Returns:
             API response with the created classification
         Raises:
@@ -83,6 +91,8 @@ class ClassificationsClient:
             payload["track_id"] = track_id
         if metadata is not None:
             payload["metadata"] = metadata
+        if classification_data is not None:
+            payload["classification_data"] = classification_data
         # Make API request
         return self._client.post("classifications", payload)
     

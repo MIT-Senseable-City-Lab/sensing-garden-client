@@ -135,6 +135,38 @@ videos = sgc.videos.fetch(
     start_time="2023-06-01T00:00:00Z",
     end_time="2023-06-02T00:00:00Z"
 )
+
+# Working with environmental data
+# Submit environmental sensor readings
+environment_reading = sgc.environment.add(
+    device_id="device-123",
+    location={
+        "lat": 40.7128,      # Latitude
+        "long": -74.0060,    # Longitude
+        "alt": 10.5          # Altitude in meters (optional)
+    },
+    data={
+        "pm1p0": 12.5,              # PM1.0 particulate matter (μg/m³)
+        "pm2p5": 25.3,              # PM2.5 particulate matter (μg/m³)
+        "pm4p0": 35.8,              # PM4.0 particulate matter (μg/m³)
+        "pm10p0": 45.2,             # PM10.0 particulate matter (μg/m³)
+        "ambient_humidity": 65.5,    # Relative humidity (%)
+        "ambient_temperature": 22.3, # Temperature (°C)
+        "voc_index": 150,           # Volatile Organic Compounds index
+        "nox_index": 75             # Nitrogen Oxides index
+    },
+    timestamp="2023-06-01T12:34:56Z"  # Required ISO-8601 formatted timestamp
+)
+
+# Fetch environmental data with filters
+environment_data = sgc.environment.fetch(
+    device_id="device-123",
+    start_time="2023-06-01T00:00:00Z",
+    end_time="2023-06-02T00:00:00Z",
+    limit=100,
+    sort_by="timestamp",
+    sort_desc=True  # Get newest readings first
+)
 ```
 
 **Note:** The video upload API no longer requires or accepts a `description` field. Only `device_id`, `timestamp`, `video_key`, and optional `metadata` are supported.

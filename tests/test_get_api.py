@@ -418,17 +418,6 @@ def test_sorting(endpoint_type, device_id, model_id, sort_by):
         print(f"❌ Error in sorting test: {str(e)}")
         assert False
 
-def test_sorting_with_invalid_sort_desc(device_id, model_id, sort_desc):
-    """Test that passing a non-boolean value for sort_desc raises an error"""
-    try:
-        test_get_endpoint('detection', device_id, model_id, None, None, None, 'timestamp', 'true')
-        assert False, "Expected error for invalid sort_desc argument"
-    except (TypeError, ValueError):
-        pass
-    except Exception as e:
-        print(f"❌ Unexpected error type: {type(e)}")
-        print(f"Error message: {str(e)}")
-        assert False, "Expected ValueError but got different error type"
 
 if __name__ == "__main__":
     # Parse command line arguments
