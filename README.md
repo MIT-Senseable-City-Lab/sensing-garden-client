@@ -82,14 +82,14 @@ detection = client.detections.add(
     device_id="pi-greenhouse-01",
     model_id="yolov8-insects-v1",
     image_data=image_data,
-    bounding_box=[0.1, 0.2, 0.8, 0.9],  # [x1, y1, x2, y2] normalized coordinates
-    timestamp="2024-08-21T12:00:00Z"
+    bounding_box=[0.15, 0.25, 0.75, 0.85],  # [x1, y1, x2, y2] as floats (0.0-1.0)
+    timestamp="2024-08-21T14:30:15Z"
 )
 
 # Retrieve detections
 detections = client.detections.fetch(
     device_id="pi-greenhouse-01",
-    start_time="2024-08-20T00:00:00Z",
+    start_time="2024-08-20T06:00:00Z",
     limit=100
 )
 ```
@@ -106,19 +106,19 @@ classification = client.classifications.add(
     family="Nymphalidae",
     genus="Danaus",
     species="Danaus plexippus",
-    family_confidence=0.95,
-    genus_confidence=0.87,
+    family_confidence=0.95,    # Float values (0.0-1.0)
+    genus_confidence=0.87,     
     species_confidence=0.82,
-    timestamp="2024-08-21T12:00:00Z",
+    timestamp="2024-08-21T16:45:30Z",
     
-    # Optional: Bounding box
-    bounding_box=[0.1, 0.2, 0.8, 0.9],
+    # Optional: Bounding box coordinates as floats
+    bounding_box=[0.2, 0.3, 0.9, 0.8],  # [x1, y1, x2, y2] normalized (0.0-1.0)
     
     # Optional: Location data
     location={
-        "lat": 40.7128,
-        "long": -74.0060,
-        "alt": 10.5  # altitude in meters
+        "lat": 37.7749,
+        "long": -122.4194,
+        "alt": 15.2  # altitude in meters
     },
     
     # Optional: Environmental sensor data
@@ -129,11 +129,11 @@ classification = client.classifications.add(
         "pm10p0": 45.2,             # PM10.0 particulate matter (μg/m³)
         "ambient_temperature": 22.3, # Temperature (°C)
         "ambient_humidity": 65.5,    # Relative humidity (%)
-        "voc_index": 150,           # Volatile Organic Compounds index
-        "nox_index": 75             # Nitrogen Oxides index
+        "voc_index": 150,           # Volatile Organic Compounds index (integer)
+        "nox_index": 75             # Nitrogen Oxides index (integer)
     },
     
-    # Optional: Multiple classification candidates
+    # Optional: Multiple classification candidates with confidence arrays
     classification_data={
         "family": [
             {"name": "Nymphalidae", "confidence": 0.95},
@@ -142,6 +142,10 @@ classification = client.classifications.add(
         "genus": [
             {"name": "Danaus", "confidence": 0.87},
             {"name": "Heliconius", "confidence": 0.65}
+        ],
+        "species": [
+            {"name": "Danaus plexippus", "confidence": 0.82},
+            {"name": "Danaus gilippus", "confidence": 0.71}
         ]
     },
     
@@ -149,11 +153,17 @@ classification = client.classifications.add(
     track_id="butterfly-track-001",
     metadata={"camera": "top", "weather": "sunny"}
 )
+
+# The classification_data parameter (added in v0.0.13) provides confidence arrays
+# for multiple candidates at each taxonomic level, replacing the need for 
+# individual confidence_array parameters
 ```
 
 ### Environmental Data
 
 Record environmental sensor readings:
+
+⚠️ **Known Issue:** The environment endpoint currently has an API payload mismatch. The client sends `{"data": {...}}` but the server expects `{"environment": {...}}`. This causes a `400 Bad Request: Missing required fields: environment` error. This issue is under investigation.
 
 ```python
 reading = client.environment.add(
@@ -168,18 +178,18 @@ reading = client.environment.add(
         "voc_index": 120,           # Chemical measurements
         "nox_index": 85
     },
-    timestamp="2024-08-21T12:00:00Z",
+    timestamp="2024-08-21T09:15:45Z",
     location={                      # Optional GPS coordinates
-        "lat": 40.7128,
-        "long": -74.0060
+        "lat": 34.0522,
+        "long": -118.2437
     }
 )
 
 # Retrieve environmental data
 env_data = client.environment.fetch(
     device_id="pi-greenhouse-01",
-    start_time="2024-08-20T00:00:00Z",
-    end_time="2024-08-21T00:00:00Z"
+    start_time="2024-08-20T08:00:00Z",
+    end_time="2024-08-21T18:00:00Z"
 )
 ```
 
@@ -193,7 +203,7 @@ Upload and manage time-lapse videos (requires AWS credentials):
 # Upload video file
 video = client.videos.upload_video(
     device_id="pi-greenhouse-01",
-    timestamp="2024-08-21T12:00:00Z",
+    timestamp="2024-08-21T11:20:00Z",
     video_path_or_data="/path/to/timelapse.mp4",  # or raw bytes
     content_type="video/mp4",
     metadata={"duration": 300, "fps": 30}
@@ -206,7 +216,7 @@ def progress_callback(uploaded, total, chunk):
 
 video = client.videos.upload_video(
     device_id="pi-greenhouse-01",
-    timestamp="2024-08-21T12:00:00Z",
+    timestamp="2024-08-21T13:45:30Z",
     video_path_or_data=video_bytes,
     progress_callback=progress_callback
 )
@@ -214,6 +224,24 @@ video = client.videos.upload_video(
 # List videos
 videos = client.videos.fetch(device_id="pi-greenhouse-01")
 ```
+
+### Data Formats
+
+#### Bounding Boxes
+
+**For Detections (Required):**
+- Must be **lists of 4 numeric values** (int or float)
+- Format: `[x1, y1, x2, y2]` where coordinates range from 0.0 to 1.0
+- Example: `[0.15, 0.25, 0.75, 0.85]` represents a box from (15%, 25%) top-left to (75%, 85%) bottom-right
+- Strict validation: tuples, strings, or wrong-length arrays will be rejected
+
+**For Classifications (Optional):**
+- Flexible format support for different detection systems
+- Standard: `[0.1, 0.2, 0.8, 0.9]`
+- Dictionary: `{"x1": 0.1, "y1": 0.2, "x2": 0.8, "y2": 0.9}`
+- String: `"0.1,0.2,0.8,0.9"`
+- Tuple: `(0.1, 0.2, 0.8, 0.9)`
+- Custom formats accepted for integration flexibility
 
 ### Common Query Options
 
@@ -225,8 +253,8 @@ data = client.detections.fetch(limit=50, next_token="abc123")
 
 # Time filtering
 data = client.classifications.fetch(
-    start_time="2024-08-20T00:00:00Z",
-    end_time="2024-08-21T00:00:00Z"
+    start_time="2024-08-20T07:30:00Z",
+    end_time="2024-08-21T19:30:00Z"
 )
 
 # Sorting
