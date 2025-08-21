@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sensing_garden_client"
-version = "0.0.13"
+version = "0.0.14"
 description = "Sensing Garden Client for API interaction"
 authors = ["Deniz Aydemir <deniz@aydemir.us>"]
 readme = "README.md"
@@ -21,6 +21,10 @@ python = ">=3.8"
 requests = "^2.32.3"
 boto3 = "^1.28.0"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+python-dotenv = "^1.0.0"
+pillow = "^10.0.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -36,7 +36,9 @@ class ClassificationsClient:
         bounding_box: Optional[Any] = None,
         track_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        classification_data: Optional[Dict[str, Any]] = None
+        classification_data: Optional[Dict[str, Any]] = None,
+        location: Optional[Dict[str, float]] = None,
+        environment: Optional[Dict[str, float]] = None
     ) -> Dict[str, Any]:
         """
         Submit a classification to the Sensing Garden API.
@@ -62,6 +64,11 @@ class ClassificationsClient:
                                  "genus": [{"name": "genus_name", "confidence": 0.8}, ...], 
                                  "species": [{"name": "species_name", "confidence": 0.7}, ...]
                                }
+            location: Optional dict containing geographic coordinates with keys:
+                     'lat' (latitude), 'long' (longitude), 'alt' (altitude, optional)
+            environment: Optional dict containing environmental sensor readings with keys:
+                        'pm1p0', 'pm2p5', 'pm4p0', 'pm10p0', 'ambient_temperature', 
+                        'ambient_humidity', 'voc_index', 'nox_index'
         Returns:
             API response with the created classification
         Raises:
@@ -93,6 +100,10 @@ class ClassificationsClient:
             payload["metadata"] = metadata
         if classification_data is not None:
             payload["classification_data"] = classification_data
+        if location is not None:
+            payload["location"] = location
+        if environment is not None:
+            payload["environment"] = environment
         # Make API request
         return self._client.post("classifications", payload)
     
